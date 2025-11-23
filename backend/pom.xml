@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.4</version> <!-- Make sure that this version matches the spring.boot.version property below! -->
+    </parent>
+
+    <groupId>customer</groupId>
+    <artifactId>backend-parent</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <name>backend parent</name>
+
+    <properties>
+        <!-- OUR VERSION -->
+        <revision>1.0.0-SNAPSHOT</revision>
+
+        <!-- DEPENDENCIES VERSION -->
+        <jdk.version>21</jdk.version>
+        <sap-cloud-sdk-bom.version>5.17.0</sap-cloud-sdk-bom.version>
+        <cds.services.version>3.9.0</cds.services.version>
+        <spring.boot.version>3.4.4</spring.boot.version> <!-- Make sure that this version matches the spring-boot-starter-parent version above! -->
+        <xsuaa.version>3.5.9</xsuaa.version>
+
+        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+
+        <cds.install-node.downloadUrl>https://nodejs.org/dist/</cds.install-node.downloadUrl>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <modules>
+        <module>srv</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- SAP CLOUD SDK -->
+            <!--
+                This needs to be compatible with the CAP Java version.
+                See https://cap.cloud.sap/docs/java/migration#cloudsdk5 for more information.
+            -->
+            <dependency>
+                <groupId>com.sap.cloud.sdk</groupId>
+                <artifactId>sdk-bom</artifactId>
+                <version>${sap-cloud-sdk-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- CDS SERVICES -->
+            <dependency>
+                <groupId>com.sap.cds</groupId>
+                <artifactId>cds-services-bom</artifactId>
+                <version>${cds.services.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- XSUAA -->
+            <dependency>
+                <groupId>com.sap.cloud.security</groupId>
+                <artifactId>java-bom</artifactId>
+                <version>${xsuaa.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        
+
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>cronos-cx-artifacts</id>
+            <name>Cronos Shared SalesQuoteAPI</name>
+            <url>https://pkgs.dev.azure.com/cronos/_packaging/cronos-cx-artifacts/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven-antrun-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.sap.cds</groupId>
+                    <artifactId>cds-maven-plugin</artifactId>
+                    <version>${cds.services.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!-- JAVA VERSION -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <release>${jdk.version}</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- MAKE SPRING BOOT PLUGIN RUNNABLE FROM ROOT -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <!-- SUREFIRE VERSION -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+            </plugin>
+
+            <!-- POM FLATTENING FOR CI FRIENDLY VERSIONS -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- PROJECT STRUCTURE CHECKS -->
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>Project Structure Checks</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.6.3</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>${jdk.version}</version>
+                                </requireJavaVersion>
+                                <reactorModuleConvergence />
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

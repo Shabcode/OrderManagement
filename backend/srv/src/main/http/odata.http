@@ -1,0 +1,11 @@
+### Load ODATA-metadata
+GET {{base-path}}/odata/v4/service/$metadata
+Accept: application/json
+Authorization: {{auth-system}}
+
+### Call action "Say Hello"
+GET {{base-path}}/odata/v4/service/sayHello(name='world')
+Accept: application/json
+Authorization: {{auth-system}}
+
+

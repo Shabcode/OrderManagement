@@ -1,0 +1,14 @@
+{
+    "sql": {
+        "native_hana_associations": false
+    },
+    "requires": {
+        "db": "hana",
+        "[production]": {
+            "auth": "xsuaa"
+        }
+    },
+    "hana": {
+        "deploy-format": "hdbtable"
+    }
+}

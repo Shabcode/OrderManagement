@@ -1,0 +1,6 @@
+{
+    "dummy": {
+        "congratulations": "Dein Mashup ist initialisiert. Es kann losgehen! 🎉",
+        "backend-error": "Fehler: Backend nicht verfügbar"
+    }
+}

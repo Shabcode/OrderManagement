@@ -1,0 +1,88 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - develop
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+  npm_config_cache: $(Pipeline.Workspace)/.npm
+
+steps:
+  - task: Cache@2
+    inputs:
+      key: 'npm | "$(Agent.OS)" | **/package-lock.json'
+      restoreKeys: |
+        npm | "$(Agent.OS)"
+      path: $(npm_config_cache)
+    displayName: Cache npm
+
+  - task: Cache@2
+    inputs:
+      key: 'maven | "$(Agent.OS)" | **/pom.xml'
+      restoreKeys: |
+        maven | "$(Agent.OS)"
+        maven
+      path: $(MAVEN_CACHE_FOLDER)
+    displayName: Cache Maven local repo
+
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '21' # string. Required. JDK version. Default: 8.
+      jdkArchitectureOption: 'x64' # 'x64' | 'x86'. Required. JDK architecture.
+      jdkSourceOption: 'PreInstalled' # 'AzureStorage' | 'LocalDirectory' | 'PreInstalled'. Required. JDK source.
+
+  - task: MavenAuthenticate@0
+    displayName: 'Maven Authenticate'
+    inputs:
+      artifactsFeeds: cronos-cx-artifacts
+
+  - script: |
+      ./mvnw test -f backend/pom.xml -B
+    displayName: 'Run unit tests'
+
+  - script: |
+      wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+      echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+      sudo apt-get update
+      sudo apt-get install cf8-cli
+    displayName: 'Install CloudFoundry CLI'
+
+  - script: |
+      cf add-plugin-repo CF-Community https://plugins.cloudfoundry.org 
+      cf install-plugin multiapps -f
+    displayName: 'cf install multiapps plugin'
+
+  - script: |
+      cf login --origin $(cfOrigin) -u $(cfTechnicalUserName) -p '$(cfPassword)' -a $(cfApiEndpoint) -o "$(cfOrgName)" -s "$(cfSpaceName)"
+    displayName: 'cf login'
+
+  - script: |
+      npm i
+    displayName: 'NPM install'
+
+  - script: |
+      npm run lint
+    displayName: 'Run angular linter'
+
+  - script: |
+      npm run build:cf
+    displayName: 'Build mtar archive'
+
+  - script: |
+      npm run deploy:cf
+    displayName: 'Deploy to cloud foundry environment'
+
+  # __remove_no_database__
+  - script: |
+      cd backend && npx cds deploy --to hana:ordermanagement-db
+    displayName: 'Deploy HANA database schema'

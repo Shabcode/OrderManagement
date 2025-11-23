@@ -1,0 +1,4 @@
+plugin: rest
+path: '/dummy'
+response:
+  file: dummy.json

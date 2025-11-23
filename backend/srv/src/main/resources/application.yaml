@@ -1,0 +1,45 @@
+logging:
+  level:
+    com.sap.cloud: INFO
+---
+spring:
+  config.activate.on-profile: default
+  # __remove_no_database__
+  sql:
+    init:
+      schema-locations: classpath:schema-h2.sql
+cds:
+  data-source.auto-config.enabled: false
+---
+spring:
+  config:
+    activate:
+      on-profile: cloud
+cds:
+  data-source.auto-config.enabled: true
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+cds:
+  data-source:
+    csv:
+      paths:
+        - backend/db/data/**
+  security:
+    mock:
+      enabled: true
+      default-users:
+        enabled: false
+      users:
+        authenticated:
+          password: p4ssw0rd
+        system:
+          system-user: true
+          password: p4ssw0rd
+        internal:
+          internal-user: true
+          password: p4ssw0rd
+    authentication:
+      mode: never

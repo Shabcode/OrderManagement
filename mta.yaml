@@ -1,0 +1,107 @@
+# MTA Descriptor reference https://github.com/cloudfoundry/multiapps-controller/wiki/Deployment-Descriptor
+
+ID: ordermanagement
+_schema-version: 3.2.0
+version: 1.0.0
+parameters:
+  enable-parallel-deployments: true
+
+modules:
+  - name: ordermanagement-approuter
+    type: approuter.nodejs
+    path: ./approuter
+    provides:
+      - name: approuter-service
+        properties:
+          approuter-url: ${default-url}
+    parameters:
+      memory: 256MB
+      disk-quota: 512MB
+      routes:
+        - route: ${default-uri} # composed from ${default-host}.${default-domain} --> see https://github.com/SAP-samples/cf-mta-examples/blob/main/app-routes/modelled_with_host_and_domain/mta.yaml
+    properties:
+      COOKIES: { 'SameSite': 'None' }
+      ENABLE_FRAME_ANCESTORS_CSP_HEADERS: true
+    requires:
+      - name: ordermanagement-xsuaa
+      - name: ordermanagement-html5-runtime
+      # The following entry will add an environment variable to the approuter which will configure a destination
+      # note that that destination will not appear under "destinations" in the BTP UI. The approuter apparently
+      # considers the destination service's destinations as well as "destinations" environment variables.
+      - name: ordermanagement-srv-api
+        group: destinations
+        properties:
+          name: backend
+          url: ~{srv-url}
+          forwardAuthToken: true
+          strictSSL: true
+  - name: ordermanagement-backend
+    path: ./backend/srv
+    type: java
+    parameters:
+      buildpack: java_buildpack
+      readiness-health-check-type: process
+      memory: 512MB
+      disk-quota: 512MB
+    properties:
+      SPRING_PROFILES_ACTIVE: cloud
+      JBP_CONFIG_COMPONENTS: "jres: ['JavaBuildpack::Jre::SapMachineJRE']"
+      JBP_CONFIG_SAP_MACHINE_JRE: '{ jre: { version: 21.+ } }'
+    build-parameters:
+      builder: custom
+      commands:
+        - mvn clean package -B -DskipTests=true
+      build-result: target/*-exec.jar
+    provides:
+      - name: ordermanagement-srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: ordermanagement-xsuaa
+      - name: ordermanagement-logging
+      - name: ordermanagement-db
+      - name: ordermanagement-destination-service
+resources:
+  - name: ordermanagement-xsuaa
+    type: com.sap.xs.uaa
+    requires:
+      - name: approuter-service
+    parameters:
+      service-plan: application
+      service: xsuaa
+      service-name: ordermanagement-xsuaa
+      config:
+        xsappname: ordermanagement-xsuaa
+        tenant-mode: dedicated
+        oauth2-configuration:
+          redirect-uris:
+            - ~{approuter-service/approuter-url}/login/callback
+  - name: ordermanagement-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+      service-name: ordermanagement-html5-runtime
+  - name: ordermanagement-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: lite
+      service: destination
+      service-name: destination-service
+  - name: ordermanagement-logging
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: application-logs
+      service-plan: lite
+
+  # __remove_no_database__
+  - name: ordermanagement-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      config:
+        # This is the instance id of the actual HANA database. Required only if the database is in another space.
+        # TODO: Will need to find out how to pass this in dynamically from the build pipeline, in case we want to deploy this application to
+        # another BTP tenant
+        database_id: 6a78e0c5-e747-4549-b67c-16dda08ae07c
+    properties:
+      hdi-container-name: ordermanagement-db

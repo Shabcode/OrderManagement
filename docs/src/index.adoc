@@ -1,0 +1,24 @@
+:lang: de
+:toc: left
+:toclevels: 3
+:icons: font
+:nofooter:
+
+include::locale/attributes.adoc[]
+
+= Dokumentation zu __app_name__
+
+== Funktionale Übersicht
+=== Überblick über die Anforderungen
+=== Fachliche Struktur der Anwendung
+
+== Betriebsanleitung
+=== Build und Deployment
+=== Konfiguration
+=== Troubleshooting
+
+== Entwickleranleitung
+=== Schnellstart
+=== Architektur
+=== Testing
+=== Besonderheiten

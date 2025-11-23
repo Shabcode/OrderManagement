@@ -1,0 +1,29 @@
+{
+    "authenticationMethod": "route",
+    "sessionTimeout": 480,
+    "routes": [
+        {
+            "source": "^/backend/(.*)$",
+            "target": "$1",
+            "authenticationType": "xsuaa",
+            "identityProvider": "sap.custom",
+            "cacheControl": "no-cache, no-store, must-revalidate",
+            "destination": "backend"
+        },
+        {
+            "source": "^/docs/(.*)$",
+            "target": "$1",
+            "localDir": "./docs/generated-docs",
+            "cacheControl": "no-cache, no-store, must-revalidate",
+            "authenticationType": "xsuaa",
+            "identityProvider": "sap.custom"
+        },
+        {
+            "source": "(.*)",
+            "localDir": "./webapp/angular-mashup/browser",
+            "cacheControl": "no-cache, no-store, must-revalidate",
+            "authenticationType": "xsuaa",
+            "identityProvider": "sap.custom"
+        }
+    ]
+}

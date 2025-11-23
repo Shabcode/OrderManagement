@@ -1,0 +1,10 @@
+version: '3.1'
+
+services:
+  ordermanagement-adjacent-system-simulation:
+    container_name: ordermanagement-adjacent-system-simulation
+    image: outofcoffee/imposter:4.2.4
+    ports:
+      - '8081:8080'
+    volumes:
+      - ./config:/opt/imposter/config

@@ -1,0 +1,32 @@
+{
+    "name": "ordermanagement",
+    "version": "1.0.0",
+    "description": "Ccx template for a mashup using angular",
+    "scripts": {
+        "postinstall": "cd angular-mashup && npm i && cd ../approuter && npm i && cd ../backend/db && npm i",
+        "mashup:init": "node init.mjs",
+        "build:angular": "cd angular-mashup && ng build",
+        "build:docs": "mvnw --batch-mode -f docs/pom.xml clean package",
+        "clean:webapp": "npx shx rm -rf approuter/webapp",
+        "clean:mtar": "npx shx rm -rf mta_archives",
+        "build:mtar": "npx mbt build",
+        "build:cf": "npm-run-all --sequential clean:webapp build:angular build:docs clean:mtar build:mtar",
+        "deploy:cf": "cf deploy mta_archives/ordermanagement_1.0.0.mtar --abort-on-error",
+        "lint": "cd angular-mashup && ng lint",
+        "prepare": "husky install"
+    },
+    "devDependencies": {
+        "@angular/cli": "^17.3.7",
+        "husky": "^9.1.7",
+        "lint-staged": "^15.2.11",
+        "mbt": "^1.2.27",
+        "npm-run-all": "^4.1.5",
+        "prettier": "3.4.2",
+        "prettier-plugin-java": "2.6.5",
+        "replace-in-file": "^7.1.0",
+        "shx": "^0.3.4"
+    },
+    "lint-staged": {
+        "**/*": "prettier --write --ignore-unknown"
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "name": "angular-mashup",
+    "version": "0.0.0",
+    "scripts": {
+        "ng": "ng",
+        "start": "ng serve",
+        "build": "ng build",
+        "watch": "ng build --watch --configuration development",
+        "test": "ng test",
+        "lint": "ng lint"
+    },
+    "private": true,
+    "dependencies": {
+        "@angular/animations": "^18.2.13",
+        "@angular/cdk": "^18.2.13",
+        "@angular/common": "^18.2.13",
+        "@angular/compiler": "^18.2.13",
+        "@angular/core": "^18.2.13",
+        "@angular/forms": "^18.2.13",
+        "@angular/platform-browser": "^18.2.13",
+        "@angular/platform-browser-dynamic": "^18.2.13",
+        "@angular/router": "^18.2.13",
+        "@fundamental-ngx/cdk": "0.53.2",
+        "@fundamental-ngx/core": "0.53.2",
+        "@fundamental-ngx/datetime-adapter": "0.53.2",
+        "@fundamental-ngx/i18n": "0.53.2",
+        "@jsverse/transloco": "^7.6.1",
+        "@sap-theming/theming-base-content": "^11.22.0",
+        "dayjs": "^1.11.12",
+        "fundamental-styles": "0.38.0",
+        "rxjs": "~7.8.0",
+        "tslib": "^2.3.0",
+        "zone.js": "~0.14.10"
+    },
+    "devDependencies": {
+        "@angular-devkit/build-angular": "^18.2.12",
+        "@angular/cli": "^18.2.12",
+        "@angular/compiler-cli": "^18.2.13",
+        "@types/jasmine": "~5.1.0",
+        "angular-eslint": "19.0.2",
+        "eslint": "^9.16.0",
+        "jasmine-core": "~5.1.0",
+        "karma": "~6.4.0",
+        "karma-chrome-launcher": "~3.2.0",
+        "karma-coverage": "~2.2.0",
+        "karma-jasmine": "~5.1.0",
+        "karma-jasmine-html-reporter": "~2.1.0",
+        "typescript": "~5.4.2",
+        "typescript-eslint": "8.18.0"
+    }
+}
